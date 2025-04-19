@@ -1,7 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 
-author 'Your Name'
+author 'Inkwell Studios'
 description 'FiveM React NUI Template'
 version '1.0.0'
 
@@ -10,17 +10,20 @@ ui_page 'web/build/index.html'
 
 -- Shared Scripts
 shared_scripts {
-    'shared/*.lua'
+    'shared/*.lua',
+    'shared/*.js'
 }
 
 -- Client Scripts
 client_scripts {
-    'client/*.js'
+    'client/*.js',
+    'client/*.lua'
 }
 
 -- Server Scripts
 server_scripts {
-    'server/*.js'
+    'server/*.js',
+    'server/*.lua'
 }
 
 -- Additional UI Assets
