@@ -4,6 +4,7 @@ game 'gta5'
 author 'Inkwell Studios'
 description 'FiveM React NUI Template'
 version '1.0.0'
+license 'MIT'
 
 -- UI
 ui_page 'web/build/index.html'
