@@ -5,6 +5,7 @@ import { Button } from './components/ui/Button'
 import { useEventListener } from './hooks/useEventListener'
 import { makeElementDraggable } from './hooks/useDraggable'
 import { useRateLimit } from './hooks/useRateLimit'
+import { selectVisible, useNuiSelector } from './stores/nui'
 
 interface Action {
   id: string
@@ -20,7 +21,8 @@ const ACTIONS: Action[] = [
 ]
 
 export default function App() {
-  const { visible, sendMessage, hideFrame } = useNui()
+  const { sendMessage, hideFrame } = useNui()
+  const visible = useNuiSelector(selectVisible)
   const [lastAction, setLastAction] = useState<string | null>(null)
   const cardRef = useRef<HTMLDivElement | null>(null)
 

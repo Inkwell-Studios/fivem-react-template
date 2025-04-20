@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useCallback, useEffect, ReactNode } from 'react'
-import { useNuiState, useNuiSelector } from '../stores/nui'
+import React, { createContext, useContext, useCallback, useEffect, ReactNode, useMemo } from 'react'
+import { useNuiState, useNuiSelector, selectVisible, selectUiReady, selectLastMessage, selectRateLimitResponses, NuiMessage } from '../stores/nui'
 
 // Add global type augmentation for FiveM and Vite
 declare global {
@@ -16,7 +16,7 @@ export interface NuiContextValue {
   setVisible: (visible: boolean) => void
   sendMessage: (event: string, data?: Record<string, unknown>) => Promise<any>
   hideFrame: () => void
-  handleNuiMessage: (event: MessageEvent) => void
+  handleNuiMessage: (event: MessageEvent<NuiMessage>) => void
 }
 
 const NuiContext = createContext<NuiContextValue | null>(null)
@@ -32,10 +32,10 @@ interface NuiProviderProps {
 }
 
 export const NuiProvider: React.FC<NuiProviderProps> = ({ children }) => {
-  const setVisible = useNuiState((state: any) => state.setVisible)
-  const setUiReady = useNuiState((state: any) => state.setUiReady)
-  const handleNuiMessage = useNuiState((state: any) => state.handleNuiMessage)
-  const visible = Boolean(useNuiSelector((state: any) => state.visible))
+  const setVisible = useNuiState(state => state.setVisible)
+  const setUiReady = useNuiState(state => state.setUiReady)
+  const handleNuiMessage = useNuiState(state => state.handleNuiMessage)
+  const visible = useNuiSelector(selectVisible)
 
   // Function to send messages to the game client
   const sendMessage = useCallback(async (event: string, data: Record<string, unknown> = {}) => {
@@ -75,11 +75,11 @@ export const NuiProvider: React.FC<NuiProviderProps> = ({ children }) => {
   }, [sendMessage, setVisible])
 
   useEffect(() => {
-    window.addEventListener('message', handleNuiMessage)
+    window.addEventListener('message', handleNuiMessage as EventListener)
     sendMessage('uiReady')
     setUiReady(true)
     return () => {
-      window.removeEventListener('message', handleNuiMessage)
+      window.removeEventListener('message', handleNuiMessage as EventListener)
     }
   }, [sendMessage, handleNuiMessage, setUiReady])
 
@@ -93,13 +93,13 @@ export const NuiProvider: React.FC<NuiProviderProps> = ({ children }) => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [hideFrame])
 
-  const value: NuiContextValue = {
+  const value = useMemo<NuiContextValue>(() => ({
     visible,
     setVisible,
     sendMessage,
     hideFrame,
     handleNuiMessage
-  }
+  }), [visible, setVisible, sendMessage, hideFrame, handleNuiMessage])
 
   return (
     <NuiContext.Provider value={value}>
