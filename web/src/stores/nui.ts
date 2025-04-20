@@ -1,8 +1,19 @@
 import { create } from 'zustand'
 import { shallow } from 'zustand/shallow'
 
+export interface NuiState {
+  visible: boolean
+  uiReady: boolean
+  lastMessage: { type: string; data: any } | null
+  rateLimitResponses: Map<string, boolean>
+  setVisible: (visible: boolean) => void
+  setUiReady: (ready: boolean) => void
+  handleRateLimitResponse: (actionId: string, allowed: boolean) => void
+  handleNuiMessage: (event: MessageEvent) => void
+}
+
 // Define the state structure and actions
-export const useNuiState = create((set, get) => ({
+export const useNuiState = create<NuiState>((set, get) => ({
   // Initial state
   visible: false,
   uiReady: false,
@@ -10,24 +21,24 @@ export const useNuiState = create((set, get) => ({
   rateLimitResponses: new Map(), // Store rate limit responses
 
   // Action to set visibility
-  setVisible: (visible) => {
+  setVisible: (visible: boolean) => {
     set({ visible })
   },
 
   // Action to mark UI as ready
-  setUiReady: (ready) => {
+  setUiReady: (ready: boolean) => {
     set({ uiReady: ready })
   },
 
   // Action to handle rate limit response
-  handleRateLimitResponse: (actionId, allowed) => {
+  handleRateLimitResponse: (actionId: string, allowed: boolean) => {
     set((state) => ({
       rateLimitResponses: new Map(state.rateLimitResponses).set(actionId, allowed)
     }))
   },
 
   // Action to handle incoming NUI messages
-  handleNuiMessage: (event) => {
+  handleNuiMessage: (event: MessageEvent) => {
     const { type, data } = event.data
     set({ lastMessage: { type, data } }) // Store last message for debugging
 
@@ -53,6 +64,6 @@ export const useNuiState = create((set, get) => ({
 }))
 
 // Hook to select specific state properties with shallow comparison
-export const useNuiSelector = (selector) => {
+export const useNuiSelector = <T>(selector: (state: NuiState) => T): T => {
   return useNuiState(selector, shallow)
 } 

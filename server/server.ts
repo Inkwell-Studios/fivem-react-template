@@ -1,5 +1,5 @@
 // Example of receiving data from client
-onNet('inkwell-react-template:buttonClicked', (message) => {
+onNet('inkwell-react-template:buttonClicked', (message: any) => {
   const source = global.source
   console.log(`Player ${source} clicked button with message: ${message}`)
  
@@ -10,15 +10,15 @@ onNet('inkwell-react-template:buttonClicked', (message) => {
 })
 
 // Rate limit storage - tracks cooldowns per user
-const rateLimits = new Map()
+const rateLimits = new Map<any, any>()
 
 // Helper to clean up expired rate limits
 const cleanupRateLimits = () => {
   const now = Date.now()
   for (const [userId, limits] of rateLimits.entries()) {
-    for (const [actionId, timestamp] of Object.entries(limits)) {
-      if (now - timestamp.lastAction >= timestamp.cooldown) {
-        delete limits[actionId]
+    for (const [actionId, timestamp] of Object.entries(limits as any)) {
+      if (now - (timestamp as any).lastAction >= (timestamp as any).cooldown) {
+        delete (limits as any)[actionId]
       }
     }
     if (Object.keys(limits).length === 0) {
@@ -31,7 +31,7 @@ const cleanupRateLimits = () => {
 setInterval(cleanupRateLimits, 60000)
 
 // Check if an action is rate limited
-const isRateLimited = (userId, actionId) => {
+const isRateLimited = (userId: any, actionId: any) => {
   const userLimits = rateLimits.get(userId)
   if (!userLimits || !userLimits[actionId]) return false
 
@@ -41,7 +41,7 @@ const isRateLimited = (userId, actionId) => {
 }
 
 // Set rate limit for a user's action
-const setRateLimit = (userId, actionId, cooldown) => {
+const setRateLimit = (userId: any, actionId: any, cooldown: any) => {
   if (!rateLimits.has(userId)) {
     rateLimits.set(userId, {})
   }
@@ -54,7 +54,7 @@ const setRateLimit = (userId, actionId, cooldown) => {
 }
 
 // Handle rate limit check requests from clients
-onNet('inkwell-react-template:checkRateLimit', (actionId, cooldown) => {
+onNet('inkwell-react-template:checkRateLimit', (actionId: any, cooldown: any) => {
   const src = source
   // Use the player's source as their ID since it's unique per session
   const userId = src.toString()
@@ -72,4 +72,6 @@ onNet('inkwell-react-template:checkRateLimit', (actionId, cooldown) => {
     actionId,
     allowed: true
   })
-}) 
+})
+
+export {} 
