@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useNui } from '../providers/NuiProvider'
-import { useNuiState } from '../stores/nui'
+import { useNuiState, selectRateLimitResponses, NuiMessage } from '../stores/nui'
 import { useRateLimitStore } from '../stores/rateLimitStore'
 import type { RateLimitStoreState } from '../stores/rateLimitStore'
 
@@ -26,7 +26,7 @@ export function useRateLimit(
   const [rateLimitMessage, setRateLimitMessage] = useState<string | null>(null)
   const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { getLastActionTime, setLastActionTime } = useRateLimitStore() as RateLimitStoreState
-  const rateLimitResponses = useNuiState((state: any) => state.rateLimitResponses as Map<string, boolean>)
+  const rateLimitResponses = useNuiState(selectRateLimitResponses)
 
   const showMessage = (msg: string) => {
     setRateLimitMessage(msg)
