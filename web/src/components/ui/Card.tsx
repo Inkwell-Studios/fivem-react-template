@@ -1,6 +1,11 @@
 import React, { forwardRef } from 'react'
 
-export const Card = forwardRef(function Card({ className = '', children, ...props }, ref) {
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string
+  children?: React.ReactNode
+}
+
+export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({ className = '', children, ...props }, ref) {
   return (
     <div
       ref={ref}
@@ -21,7 +26,7 @@ export const Card = forwardRef(function Card({ className = '', children, ...prop
   )
 })
 
-export const CardHeader = forwardRef(function CardHeader({ className = '', children, ...props }, ref) {
+export const CardHeader = forwardRef<HTMLDivElement, CardProps>(function CardHeader({ className = '', children, ...props }, ref) {
   return (
     <div
       ref={ref}
@@ -40,7 +45,7 @@ export const CardHeader = forwardRef(function CardHeader({ className = '', child
   )
 })
 
-export const CardContent = forwardRef(function CardContent({ className = '', children, ...props }, ref) {
+export const CardContent = forwardRef<HTMLDivElement, CardProps>(function CardContent({ className = '', children, ...props }, ref) {
   return (
     <div
       ref={ref}
@@ -55,7 +60,7 @@ export const CardContent = forwardRef(function CardContent({ className = '', chi
   )
 })
 
-export const CardFooter = forwardRef(function CardFooter({ className = '', children, ...props }, ref) {
+export const CardFooter = forwardRef<HTMLDivElement, CardProps>(function CardFooter({ className = '', children, ...props }, ref) {
   return (
     <div
       ref={ref}

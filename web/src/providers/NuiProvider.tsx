@@ -1,25 +1,47 @@
-import { createContext, useContext, useCallback, useEffect } from 'react'
+import React, { createContext, useContext, useCallback, useEffect, ReactNode } from 'react'
 import { useNuiState, useNuiSelector } from '../stores/nui'
 
-const NuiContext = createContext(null)
+// Add global type augmentation for FiveM and Vite
+declare global {
+  interface Window {
+    GetParentResourceName?: () => string;
+  }
+  interface ImportMeta {
+    env: Record<string, any>;
+  }
+}
 
-export const useNui = () => {
+export interface NuiContextValue {
+  visible: boolean
+  setVisible: (visible: boolean) => void
+  sendMessage: (event: string, data?: Record<string, unknown>) => Promise<any>
+  hideFrame: () => void
+  handleNuiMessage: (event: MessageEvent) => void
+}
+
+const NuiContext = createContext<NuiContextValue | null>(null)
+
+export const useNui = (): NuiContextValue => {
   const context = useContext(NuiContext)
   if (!context) throw new Error('useNui must be used within NuiProvider')
   return context
 }
 
-export function NuiProvider({ children }) {
-  const setVisible = useNuiState((state) => state.setVisible)
-  const setUiReady = useNuiState((state) => state.setUiReady)
-  const handleNuiMessage = useNuiState((state) => state.handleNuiMessage)
-  const visible = useNuiSelector((state) => state.visible) // Use selector for efficient updates
+interface NuiProviderProps {
+  children: ReactNode
+}
+
+export const NuiProvider: React.FC<NuiProviderProps> = ({ children }) => {
+  const setVisible = useNuiState((state: any) => state.setVisible)
+  const setUiReady = useNuiState((state: any) => state.setUiReady)
+  const handleNuiMessage = useNuiState((state: any) => state.handleNuiMessage)
+  const visible = Boolean(useNuiSelector((state: any) => state.visible))
 
   // Function to send messages to the game client
-  const sendMessage = useCallback(async (event, data = {}) => {
+  const sendMessage = useCallback(async (event: string, data: Record<string, unknown> = {}) => {
     const eventName = typeof event === 'string' ? event : 'unknownEvent'
     try {
-      const resourceName = window.GetParentResourceName ? window.GetParentResourceName() : 'inkwell-react-template' // Fallback name
+      const resourceName = window.GetParentResourceName ? window.GetParentResourceName() : 'inkwell-react-template'
       const resp = await fetch(`https://${resourceName}/${eventName}`, {
         method: 'POST',
         headers: {
@@ -30,47 +52,39 @@ export function NuiProvider({ children }) {
 
       if (!resp.ok) {
         console.error(`[NUI Provider] Failed to send ${eventName}: ${resp.status}`)
-        return null // Or throw an error
+        return null
       }
-      // Attempt to parse JSON, but return raw text if it fails
       try {
         return await resp.json()
       } catch (e) {
-        return await resp.text() // Return text if not valid JSON
+        return await resp.text()
       }
     } catch (err) {
       console.error(`[NUI Provider] Error sending ${eventName}:`, err)
-      return null // Or throw an error
+      return null
     }
   }, [])
 
   // Function to hide the NUI frame (requests client to hide)
   const hideFrame = useCallback(() => {
-    // If in dev mode, just hide locally without telling the client
     if (import.meta.env.DEV) {
       setVisible(false)
     } else {
-      sendMessage('hideFrame')
-      // Visibility state will be updated via 'setVisible' message from client
+      void sendMessage('hideFrame')
     }
   }, [sendMessage, setVisible])
 
-  // Effect to handle NUI messages from the game client
   useEffect(() => {
     window.addEventListener('message', handleNuiMessage)
-
-    // Notify client that UI is ready
     sendMessage('uiReady')
-    setUiReady(true) // Mark UI as ready in the store
-
+    setUiReady(true)
     return () => {
       window.removeEventListener('message', handleNuiMessage)
     }
   }, [sendMessage, handleNuiMessage, setUiReady])
 
-  // Effect to handle ESC key press for hiding the frame
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         hideFrame()
       }
@@ -79,9 +93,9 @@ export function NuiProvider({ children }) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [hideFrame])
 
-  const value = {
+  const value: NuiContextValue = {
     visible,
-    setVisible, // Expose setVisible for DevTools
+    setVisible,
     sendMessage,
     hideFrame,
     handleNuiMessage

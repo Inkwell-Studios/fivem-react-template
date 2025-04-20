@@ -1,7 +1,18 @@
 let nuiReady = false
 
+// Add typings for FiveM exports
+
+declare global {
+  interface CitizenExports {
+    // Example: Replace 'myResource' and 'myExport' with your actual resource and export names
+    // myResource: {
+    //   myExport(parameter: unknown): void;
+    // }
+  }
+}
+
 // Handle NUI Ready event
-RegisterNuiCallback('uiReady', (data, cb) => {
+RegisterNuiCallback('uiReady', (data: any, cb: any) => {
   nuiReady = true
   // Initially hide the UI
   SendNuiMessage(JSON.stringify({
@@ -12,13 +23,13 @@ RegisterNuiCallback('uiReady', (data, cb) => {
 })
 
 // Handle button click from NUI
-RegisterNuiCallback('buttonClicked', (data, cb) => {
+RegisterNuiCallback('buttonClicked', (data: any, cb: any) => {
   emitNet('inkwell-react-template:buttonClicked', data.message)
   cb({})
 })
 
 // Handle hide frame request from NUI
-RegisterNuiCallback('hideFrame', (_, cb) => {
+RegisterNuiCallback('hideFrame', (_: any, cb: any) => {
   SetNuiFocus(false, false)
   // Also tell the UI its visibility state changed
   SendNuiMessage(JSON.stringify({
@@ -29,12 +40,12 @@ RegisterNuiCallback('hideFrame', (_, cb) => {
 })
 
 // Handle DevTools test message
-RegisterNuiCallback('devTestMessage', (data, cb) => {
+RegisterNuiCallback('devTestMessage', (data: any, cb: any) => {
   cb({ received: true, timestamp: data.timestamp })
 })
 
 // Handle rate limit responses from server
-onNet('inkwell-react-template:rateLimitResponse', (response) => {
+onNet('inkwell-react-template:rateLimitResponse', (response: any) => {
   // Ensure response is properly formatted before sending to NUI
   const message = {
     type: 'rateLimitResponse',
@@ -47,7 +58,7 @@ onNet('inkwell-react-template:rateLimitResponse', (response) => {
 })
 
 // Handle rate limit check requests from NUI
-RegisterNuiCallback('checkRateLimit', (data, cb) => {
+RegisterNuiCallback('checkRateLimit', (data: any, cb: any) => {
   const { actionId, cooldown } = data
   emitNet('inkwell-react-template:checkRateLimit', actionId, cooldown)
   cb({})
@@ -75,7 +86,7 @@ RegisterCommand('hideui', () => {
 }, false)
 
 // Example of receiving data from server
-onNet('inkwell-react-template:updateFromServer', (data) => {
+onNet('inkwell-react-template:updateFromServer', (data: any) => {
   if (!nuiReady) {
     return
   }
@@ -84,4 +95,6 @@ onNet('inkwell-react-template:updateFromServer', (data) => {
     type: 'updateFromServer',
     data
   }))
-}) 
+})
+
+export {} 
