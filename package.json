@@ -9,8 +9,7 @@
     "build": "cd web && npm run build",
     "build:game": "echo 'No build step needed for game scripts'",
     "dev": "concurrently \"cd web && npm run dev\" \"npm run watch:game\"",
-    "watch:game": "nodemon --watch client --watch server --watch shared --ext js,lua",
-    "postinstall": "cd web && npm install"
+    "watch:game": "nodemon --watch client --watch server --watch shared --ext js,lua"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
