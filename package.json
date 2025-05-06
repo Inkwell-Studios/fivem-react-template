@@ -10,8 +10,7 @@
     "build:client": "tsc",
     "build:game": "yarn build:client",
     "dev": "concurrently \"cd web && npm run dev\" \"npm run watch:game\"",
-    "watch:game": "nodemon --watch client --watch server --watch shared --ext js,lua",
-    "postinstall": "cd web && npm install"
+    "watch:game": "nodemon --watch client --watch server --watch shared --ext js,lua"
   },
   "devDependencies": {
     "@citizenfx/client": "^2.0.14318-1",
@@ -21,4 +20,3 @@
     "nodemon": "^3.0.3",
     "typescript": "^5.8.3"
   }
-}
