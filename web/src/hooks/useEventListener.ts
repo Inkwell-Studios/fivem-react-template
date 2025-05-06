@@ -7,9 +7,14 @@ import { useEffect, useRef } from 'react'
  * @param {Element | Window | Document | null} element - The element to attach the listener to (defaults to window)
  * @param {boolean} [passive=false] - Whether the event listener should be passive
  */
-export const useEventListener = (eventName, handler, element = window, passive = false) => {
+export function useEventListener<T extends Event = Event>(
+  eventName: string,
+  handler: (event: T) => void,
+  element: Element | Window | Document | null = window,
+  passive = false
+): void {
   // Create a ref that stores handler
-  const savedHandler = useRef(handler)
+  const savedHandler = useRef<(event: T) => void>(handler)
 
   useEffect(() => {
     savedHandler.current = handler
@@ -17,12 +22,12 @@ export const useEventListener = (eventName, handler, element = window, passive =
 
   useEffect(() => {
     // Define the listening target
-    const targetElement = element?.current ?? element
+    const targetElement = (element && 'current' in element) ? (element as any).current ?? element : element
 
     if (!targetElement?.addEventListener) return
 
     // Create event listener that calls handler function stored in ref
-    const eventListener = (event) => savedHandler.current(event)
+    const eventListener = (event: Event) => savedHandler.current(event as T)
 
     // Add event listener
     const options = passive ? { passive } : undefined
@@ -41,14 +46,18 @@ export const useEventListener = (eventName, handler, element = window, passive =
  * @param {Element | Window | Document | null} element - The element to attach the listeners to
  * @param {boolean} [passive=false] - Whether the event listeners should be passive
  */
-export const useEventListeners = (events, element = window, passive = false) => {
+export function useEventListeners<T extends Event = Event>(
+  events: { name: string; handler: (event: T) => void }[],
+  element: Element | Window | Document | null = window,
+  passive = false
+): void {
   useEffect(() => {
-    const targetElement = element?.current ?? element
+    const targetElement = (element && 'current' in element) ? (element as any).current ?? element : element
     if (!targetElement?.addEventListener) return
 
     // Add all event listeners
     const listeners = events.map(({ name, handler }) => {
-      const eventListener = (event) => handler(event)
+      const eventListener = (event: Event) => handler(event as T)
       const options = passive ? { passive } : undefined
       targetElement.addEventListener(name, eventListener, options)
       return { name, eventListener }

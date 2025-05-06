@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "module": "commonjs",
+    "outDir": "dist",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "types": ["@citizenfx/client", "@citizenfx/server", "node"],
+    "skipLibCheck": true
+  },
+  "include": ["client/**/*.ts", "server/**/*.ts"],
+  "exclude": ["node_modules"]
+} 

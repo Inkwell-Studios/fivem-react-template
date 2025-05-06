@@ -1,5 +1,8 @@
 // Simplest possible implementation - no dependencies, just direct DOM manipulation
-export function makeElementDraggable(element, dragHandle) {
+export function makeElementDraggable(
+  element: HTMLElement | null,
+  dragHandle?: string
+): (() => void) | undefined {
   // Basic safety check
   if (!element) return;
 
@@ -15,15 +18,15 @@ export function makeElementDraggable(element, dragHandle) {
   let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
   
   // Get the handle element or use the element itself
-  const handle = dragHandle ? element.querySelector(dragHandle) : element;
+  const handle = dragHandle ? (element.querySelector(dragHandle) as HTMLElement | null) : element;
   
   if (!handle) return;
   
   // Add mousedown event
   handle.onmousedown = dragMouseDown;
 
-  function dragMouseDown(e) {
-    e = e || window.event;
+  function dragMouseDown(e: MouseEvent) {
+    e = e || (window.event as MouseEvent);
     e.preventDefault();
     
     // Get the mouse cursor position at startup
@@ -35,16 +38,15 @@ export function makeElementDraggable(element, dragHandle) {
     document.onmouseup = closeDragElement;
   }
 
-  function elementDrag(e) {
-    e = e || window.event;
+  function elementDrag(e: MouseEvent) {
+    e = e || (window.event as MouseEvent);
     e.preventDefault();
-    
+    if (!element) return;
     // Calculate the new cursor position
     pos1 = pos3 - e.clientX;
     pos2 = pos4 - e.clientY;
     pos3 = e.clientX;
     pos4 = e.clientY;
-    
     // Set the element's new position
     element.style.top = (element.offsetTop - pos2) + "px";
     element.style.left = (element.offsetLeft - pos1) + "px";

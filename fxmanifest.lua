@@ -17,13 +17,13 @@ shared_scripts {
 
 -- Client Scripts
 client_scripts {
-    'client/*.js',
+    'dist/client/*.js',
     'client/*.lua'
 }
 
 -- Server Scripts
 server_scripts {
-    'server/*.js',
+    'dist/server/*.js',
     'server/*.lua'
 }
 

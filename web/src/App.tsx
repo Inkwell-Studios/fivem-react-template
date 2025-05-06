@@ -1,25 +1,34 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, KeyboardEvent } from 'react'
 import { useNui } from './providers/NuiProvider'
 import { Card, CardHeader, CardContent, CardFooter } from './components/ui/Card'
 import { Button } from './components/ui/Button'
 import { useEventListener } from './hooks/useEventListener'
 import { makeElementDraggable } from './hooks/useDraggable'
 import { useRateLimit } from './hooks/useRateLimit'
+import { selectVisible, useNuiSelector } from './stores/nui'
 
-const ACTIONS = [
+interface Action {
+  id: string
+  label: string
+  variant: 'primary' | 'secondary' | 'danger'
+  shortcut: string
+}
+
+const ACTIONS: Action[] = [
   { id: 'action1', label: 'Primary Action', variant: 'primary', shortcut: 'P' },
   { id: 'action2', label: 'Secondary Action', variant: 'secondary', shortcut: 'S' },
   { id: 'action3', label: 'Danger Action', variant: 'danger', shortcut: 'D' }
 ]
 
 export default function App() {
-  const { visible, sendMessage, hideFrame } = useNui()
-  const [lastAction, setLastAction] = useState(null)
-  const cardRef = useRef(null)
+  const { sendMessage, hideFrame } = useNui()
+  const visible = useNuiSelector(selectVisible)
+  const [lastAction, setLastAction] = useState<string | null>(null)
+  const cardRef = useRef<HTMLDivElement | null>(null)
 
   // Rate limit setup for primary action (2 seconds)
-  const { 
-    isRateLimited: isPrimaryActionLimited, 
+  const {
+    isRateLimited: isPrimaryActionLimited,
     performAction: performPrimaryAction,
     rateLimitMessage: primaryActionMessage
   } = useRateLimit('primaryAction', 2000)
@@ -34,8 +43,9 @@ export default function App() {
   }, [visible])
 
   // Handle keyboard shortcuts
-  const handleKeyPress = useCallback((e) => {
-    const action = ACTIONS.find(a => a.shortcut.toLowerCase() === e.key.toLowerCase())
+  const handleKeyPress = useCallback((e: KeyboardEvent | KeyboardEventInit) => {
+    const key = 'key' in e ? e.key : (e as any).key
+    const action = ACTIONS.find(a => a.shortcut.toLowerCase() === key?.toLowerCase())
     if (action) {
       const message = `${action.label} was triggered by keyboard (${action.shortcut})`
       setLastAction(message)
@@ -47,8 +57,9 @@ export default function App() {
   useEventListener('keypress', handleKeyPress)
 
   // Register ESC key listener
-  useEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
+  useEventListener('keydown', (e: KeyboardEvent | KeyboardEventInit) => {
+    const key = 'key' in e ? e.key : (e as any).key
+    if (key === 'Escape') {
       hideFrame()
     }
   })

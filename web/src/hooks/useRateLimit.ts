@@ -1,24 +1,34 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useNui } from '../providers/NuiProvider'
-import { useNuiState } from '../stores/nui'
+import { useNuiState, selectRateLimitResponses, NuiMessage } from '../stores/nui'
 import { useRateLimitStore } from '../stores/rateLimitStore'
+import type { RateLimitStoreState } from '../stores/rateLimitStore'
+
+interface UseRateLimitReturn {
+  isRateLimited: boolean
+  performAction: (actionFn: () => void) => void
+  rateLimitMessage: string | null
+}
 
 /**
  * Custom hook to manage rate limiting for actions with server-side validation.
- * @param {string} id - A unique identifier for the action being rate-limited.
- * @param {number} cooldown - The cooldown period in milliseconds.
- * @param {number} messageDuration - How long to show the rate limit message (ms).
- * @returns {{ isRateLimited: boolean, performAction: (actionFn: () => void) => void, rateLimitMessage: string | null }}
+ * @param id - A unique identifier for the action being rate-limited.
+ * @param cooldown - The cooldown period in milliseconds.
+ * @param messageDuration - How long to show the rate limit message (ms).
  */
-export function useRateLimit(id, cooldown, messageDuration = 2000) {
+export function useRateLimit(
+  id: string,
+  cooldown: number,
+  messageDuration: number = 2000
+): UseRateLimitReturn {
   const { sendMessage } = useNui()
-  const [isRateLimited, setIsRateLimited] = useState(false)
-  const [rateLimitMessage, setRateLimitMessage] = useState(null)
-  const messageTimeoutRef = useRef(null)
-  const { getLastActionTime, setLastActionTime } = useRateLimitStore()
-  const rateLimitResponses = useNuiState((state) => state.rateLimitResponses)
+  const [isRateLimited, setIsRateLimited] = useState<boolean>(false)
+  const [rateLimitMessage, setRateLimitMessage] = useState<string | null>(null)
+  const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { getLastActionTime, setLastActionTime } = useRateLimitStore() as RateLimitStoreState
+  const rateLimitResponses = useNuiState(selectRateLimitResponses)
 
-  const showMessage = (msg) => {
+  const showMessage = (msg: string) => {
     setRateLimitMessage(msg)
     if (messageTimeoutRef.current) {
       clearTimeout(messageTimeoutRef.current)
@@ -54,7 +64,7 @@ export function useRateLimit(id, cooldown, messageDuration = 2000) {
   }, [])
 
   // Function to attempt performing an action, checking with server first
-  const performAction = useCallback(async (actionFn) => {
+  const performAction = useCallback((actionFn: () => void): void => {
     // Check local cooldown first to avoid unnecessary server calls
     const lastActionTime = getLastActionTime(id)
     const now = Date.now()
@@ -70,7 +80,7 @@ export function useRateLimit(id, cooldown, messageDuration = 2000) {
     if (messageTimeoutRef.current) clearTimeout(messageTimeoutRef.current)
 
     // Request server validation
-    await sendMessage('checkRateLimit', { actionId: id, cooldown })
+    void sendMessage('checkRateLimit', { actionId: id, cooldown })
     
     // The action will be executed based on the server response handled in the effect
     // If server allows, the original actionFn passed here isn't executed directly,
