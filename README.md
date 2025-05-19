@@ -22,8 +22,8 @@ Transform your FiveM UI development with:
 1. Initialize your project:
    ```bash
    cd resources
-   git clone https://github.com/yourusername/fivem-react-nui-template [resource-name]
-   cd [resource-name]
+   git clone https://github.com/Inkwell-Studios/fivem-react-template
+   cd fivem-react-template
    ```
 
 2. Set up dependencies:
